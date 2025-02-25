@@ -1,0 +1,6 @@
+namespace WingtipToysCore.Models 
+{ 
+    // This namespace will contain the data models for the WingtipToysCore application. 
+    // As per the initial setup, no specific models are defined yet. 
+    // Future tasks will involve defining models such as Product, Category, Order, etc. 
+} 

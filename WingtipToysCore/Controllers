@@ -1,0 +1,62 @@
+using Microsoft.AspNetCore.Mvc; 
+using System.Diagnostics; 
+using WingtipToysCore.Models; 
+using WingtipToysCore.Logic; 
+namespace WingtipToysCore.Controllers 
+{ 
+    public class ShoppingCartController : Controller 
+    { 
+        private readonly ShoppingCartActions _shoppingCartActions; 
+        public ShoppingCartController() 
+        { 
+            _shoppingCartActions = new ShoppingCartActions(); 
+        } 
+        public IActionResult Index() 
+        { 
+            var cartItems = _shoppingCartActions.GetCartItems(); 
+            var cartTotal = _shoppingCartActions.GetTotal(); 
+            ViewData["CartTotal"] = cartTotal; 
+            ViewData["CartItems"] = cartItems; 
+            if (cartTotal == 0) 
+            { 
+                ViewData["Message"] = "Shopping Cart is Empty"; 
+            } 
+            return View(); 
+        } 
+        [HttpPost] 
+        public IActionResult AddToCart(int productId) 
+        { 
+            try 
+            { 
+                _shoppingCartActions.AddToCart(productId); 
+                return RedirectToAction("Index"); 
+            } 
+            catch (Exception ex) 
+            { 
+                Debug.WriteLine($"ERROR: Unable to add product to cart - {ex.Message}"); 
+                return BadRequest("Unable to add product to cart."); 
+            } 
+        } 
+        [HttpPost] 
+        public IActionResult UpdateCart(int[] productIds, int[] quantities, bool[] removeItems) 
+        { 
+            try 
+            { 
+                var cartUpdates = new ShoppingCartActions.ShoppingCartUpdates[productIds.Length]; 
+                for (int i = 0; i < productIds.Length; i++) 
+                { 
+                    cartUpdates[i].ProductId = productIds[i]; 
+                    cartUpdates[i].PurchaseQuantity = quantities[i]; 
+                    cartUpdates[i].RemoveItem = removeItems[i]; 
+                } 
+                _shoppingCartActions.UpdateShoppingCartDatabase(_shoppingCartActions.GetCartId(), cartUpdates); 
+                return RedirectToAction("Index"); 
+            } 
+            catch (Exception ex) 
+            { 
+                Debug.WriteLine($"ERROR: Unable to update cart - {ex.Message}"); 
+                return BadRequest("Unable to update cart."); 
+            } 
+        } 
+    } 
+} 
